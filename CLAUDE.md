@@ -1,5 +1,10 @@
 # SVGR Types
 
+> **Git policy — never auto-commit or auto-push.** Leave your work in the working tree.
+> Run `git commit`, `git push`, `gh pr create`, or `scripts/push_all.sh` **only when the user
+> explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
+> finishing a task is not permission to commit it.
+
 Shared type definitions for the SVGR API contract.
 
 **npm**: `@sudobility/svgr_types` (public)
@@ -101,3 +106,7 @@ This package is the foundation for all `svgr_*` projects.
 - Tests are in `src/index.test.ts`
 - Test the helper functions (`successResponse`, `errorResponse`) and type guards
 - When adding new types, add corresponding tests for any associated helper functions
+
+## Git Workflow
+
+- Do not use feature branches for code changes. Always stay on the current branch.
