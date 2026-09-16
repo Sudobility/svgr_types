@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/svgr_types",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,7 +14,7 @@
     "build": "tsc -p tsconfig.esm.json",
     "clean": "rimraf dist",
     "dev": "tsc --watch",
-    "test": "vitest run",
+    "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src --ext .ts",
@@ -22,7 +22,7 @@
     "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,js,json,md}\"",
     "typecheck": "tsc --noEmit",
-    "verify": "bun run typecheck && bun run lint && bun run test && bun run build",
+    "verify": "bun run typecheck && bun run lint && bun run test:unit && bun run build",
     "prepublishOnly": "bun run clean && bun run verify"
   },
   "files": [
