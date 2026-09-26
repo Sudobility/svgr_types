@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/svgr_types",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -29,11 +29,11 @@
     "dist/**/*"
   ],
   "peerDependencies": {
-    "@sudobility/types": "^1.9.67"
+    "@sudobility/types": "^1.9.68"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
-    "@sudobility/types": "^1.9.67",
+    "@sudobility/types": "^1.9.68",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "eslint": "^9.38.0",
