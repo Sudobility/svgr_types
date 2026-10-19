@@ -281,7 +281,12 @@ export type ImageUploadResponse = BaseResponse<ImageUploadResult>;
 // ============================================
 
 /** Status of a conversion job. */
-export type JobStatus = 'pending' | 'processing' | 'done' | 'error';
+export type JobStatus =
+  | 'pending'
+  | 'processing'
+  | 'done'
+  | 'error'
+  | 'cancelled';
 
 /** Request body for POST /api/v1/jobs. */
 export interface CreateJobRequest {
@@ -336,6 +341,9 @@ export type JobStatusResponse = BaseResponse<JobResult>;
 
 /** Response from GET /api/v1/jobs?imageId=... */
 export type JobListResponse = BaseResponse<JobResult[]>;
+
+/** Response from POST /api/v1/jobs/:jobId/cancel. */
+export type CancelJobResponse = BaseResponse<JobResult>;
 
 // ============================================
 // Image History Types

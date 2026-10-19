@@ -164,8 +164,14 @@ describe('Type-level tests for ConvertResult', () => {
 
 describe('Job types', () => {
   it('JobStatus type covers all states', () => {
-    const statuses: JobStatus[] = ['pending', 'processing', 'done', 'error'];
-    expect(statuses).toHaveLength(4);
+    const statuses: JobStatus[] = [
+      'pending',
+      'processing',
+      'done',
+      'error',
+      'cancelled',
+    ];
+    expect(statuses).toHaveLength(5);
   });
 
   it('CreateJobRequest requires imageId', () => {
