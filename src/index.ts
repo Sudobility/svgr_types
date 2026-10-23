@@ -282,11 +282,7 @@ export type ImageUploadResponse = BaseResponse<ImageUploadResult>;
 
 /** Status of a conversion job. */
 export type JobStatus =
-  | 'pending'
-  | 'processing'
-  | 'done'
-  | 'error'
-  | 'cancelled';
+  'pending' | 'processing' | 'done' | 'error' | 'cancelled';
 
 /** Request body for POST /api/v1/jobs. */
 export interface CreateJobRequest {
