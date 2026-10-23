@@ -1,6 +1,6 @@
 {
   "name": "@sudobility/svgr_types",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -29,11 +29,11 @@
     "dist/**/*"
   ],
   "peerDependencies": {
-    "@sudobility/types": "^1.9.68"
+    "@sudobility/types": "^1.9.72"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
-    "@sudobility/types": "^1.9.68",
+    "@sudobility/types": "^1.9.72",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "eslint": "^9.38.0",
@@ -51,6 +51,6 @@
   "license": "BUSL-1.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/johnqh/svgr_types.git"
+    "url": "https://github.com/Sudobility/svgr_types.git"
   }
 }
