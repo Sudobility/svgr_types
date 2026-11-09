@@ -5,108 +5,78 @@
 > explicitly asks in that turn**. Approval for an earlier change does not carry forward, and
 > finishing a task is not permission to commit it.
 
-Shared type definitions for the SVGR API contract.
-
-**npm**: `@sudobility/svgr_types` (public)
+Shared TypeScript type definitions and response helpers for the SVGR image-to-SVG
+API contract. Types-only package with zero runtime dependencies (beyond the
+`@sudobility/types` peer dep). Published to **GitHub Packages** as
+`@sudobility/svgr_types`.
 
 ## Tech Stack
 
-- **Language**: TypeScript (strict mode)
-- **Runtime**: Bun
-- **Package Manager**: Bun (do not use npm/yarn/pnpm for installing dependencies)
-- **Build**: TypeScript compiler (dual ESM/CJS with .cjs rename)
-- **Test**: Vitest
+- **Language**: TypeScript (strict mode), `target`/`lib` ES2020, `moduleResolution: bundler`
+- **Runtime / package manager**: Bun (do not use npm/yarn/pnpm to install deps)
+- **Build**: `tsc -p tsconfig.esm.json` → **ESM only** (`.js` + `.d.ts` + maps into `dist/`). Package is `"type": "module"`; `exports` only define `import`/`types`. There is NO CJS output.
+- **Test**: Vitest (runtime + type-level tests via `expectTypeOf`)
+- **Lint/format**: ESLint (flat config `eslint.config.js`) + Prettier
 
 ## Project Structure
 
 ```
 src/
-├── index.ts           # All types, interfaces, and helper functions
-└── index.test.ts      # Tests
+├── index.ts        # ALL types, interfaces, const arrays, and the two helper functions
+└── index.test.ts   # Tests (runtime + type-level)
 ```
+
+Everything lives in `src/index.ts` — there is no multi-file module layout.
 
 ## Commands
 
 ```bash
-bun run build        # Dual CJS + ESM build
-bun run clean        # Remove dist/
-bun run dev          # Watch mode
-bun test             # Run tests
-bun run lint         # Run ESLint
-bun run typecheck    # TypeScript check
-bun run verify       # All checks + build (use before commit)
+bun run build          # ESM build into dist/
+bun run clean          # rimraf dist
+bun run dev            # tsc --watch
+bun run typecheck      # tsc --noEmit
+bun run lint           # eslint src --ext .ts
+bun run test:unit      # vitest run (one-shot)  <-- use this, NOT `bun test`
+bun run test:watch     # vitest watch
+bun run verify         # typecheck + lint + test:unit + build (run before publishing)
 ```
 
-## Key Exports
+- There is **no `test` script**. `bun test` invokes Bun's own runner, not Vitest — always `bun run test:unit`.
+- `bun install` needs GitHub Packages auth (`.npmrc` sets `@sudobility:registry=https://npm.pkg.github.com`; token env `GH_PACKAGES_READ_TOKEN`). Without it, deps won't install and the binaries (`tsc`, `vitest`, `eslint`) won't exist.
 
-### Types & Interfaces
+## Key Exports (see src/index.ts for the full set)
 
-- `ConvertRequest` -- input payload for SVG conversion
-- `ConvertResult` -- conversion output (SVG string, metadata)
-- `ConvertResponse` -- full API response wrapping ConvertResult
-
-### Helper Functions
-
-- `successResponse(result)` -- wrap a ConvertResult into a success ConvertResponse
-- `errorResponse(message)` -- create an error ConvertResponse
-
-### Re-exports from @sudobility/types
-
-- `ApiResponse<T>` -- generic API response envelope
-- `BaseResponse` -- base response interface
-
-## Peer Dependencies
-
-- `@sudobility/types` ^1.9.51
+- **Convert**: `ConvertRequest`, `ConvertResult`, `ConvertResponse`, `ImageType`, `IMAGE_TYPES`
+- **Upload/Jobs/History**: `ImageUploadResult`/`ImageUploadResponse`, `JobStatus`, `CreateJobRequest`, `JobResult`, `CreateJobResponse`/`JobStatusResponse`/`JobListResponse`/`CancelJobResponse`, `ImageWithJobs`, `ImageListResponse`
+- **Consumables/billing**: `BalanceResponse`, `PurchaseResponse`, `UseResponse`, `PurchaseHistoryResponse`, `UsageHistoryResponse`, `WebhookResult`/`WebhookResponse`, `AckResult`/`AckResponse`
+- **Community/health**: `COMMUNITY_PLATFORMS`, `CommunityPlatform`, `Community`, `CommunitiesResponse`, `HealthResult`, `HealthResponse`
+- **Helpers**: `successResponse<T>(data)`, `errorResponse(error)`
+- **Re-exports from `@sudobility/types`**: `ApiResponse`, `BaseResponse`, `ConsumableBalanceResponse`, `ConsumableUseResponse`, `ConsumablePurchaseRecord`, `ConsumableUsageRecord`
 
 ## Architecture
 
 ```
-@sudobility/types
-    ^
-    |
-svgr_types (this package) -- foundation layer
-    ^
-    |
-svgr_client, svgr_lib, svgr_api, svgr_app, svgr_app_rn
+@sudobility/types  (peer dep)
+      |
+svgr_types (this package) — foundation layer
+      |
+svgr_client · svgr_lib · svgr_api · svgr_app · svgr_app_rn
 ```
 
-This is the foundation layer -- consumed by all other SVGR projects.
+Consumed (directly or transitively) by all `svgr_*` projects. Every exported type is
+part of the cross-project API contract.
 
-## Related Projects
+## Conventions & Gotchas
 
-- **svgr_api** (`/Users/johnhuang/projects/svgr_api`) -- Backend API server; imports types from this package
-- **svgr_client** (`/Users/johnhuang/projects/svgr_client`) -- API client SDK; imports types from this package
-- **svgr_lib** (`/Users/johnhuang/projects/svgr_lib`) -- Shared business logic; imports types from this package
-- **svgr_app** (`/Users/johnhuang/projects/svgr_app`) -- Web app; indirect consumer via svgr_client and svgr_lib
-- **svgr_app_rn** (`/Users/johnhuang/projects/svgr_app_rn`) -- React Native app; indirect consumer via svgr_client and svgr_lib
-- **@sudobility/types** -- Upstream dependency providing `ApiResponse<T>` and `BaseResponse`
-
-This package is the foundation for all `svgr_*` projects.
-
-## Coding Patterns
-
-- Pure types and response helper functions only -- no runtime dependencies beyond `@sudobility/types`
-- Dual CJS/ESM output: build produces both `.js` (ESM) and `.cjs` (CommonJS) files
-- `ConvertRequest` fields: `original` (base64 image data), `filename`, `quality` (1-10), `transparentBg` (boolean)
-- `ConvertResult` fields: `svg` (SVG string), `width`, `height`
-- Use `successResponse()` and `errorResponse()` helpers to wrap results in the standard `ConvertResponse` envelope
-- Keep exports minimal and focused -- every export becomes part of the public API contract
-
-## Gotchas
-
-- **Changes here affect all consumers** -- svgr_api, svgr_client, svgr_lib, svgr_app, and svgr_app_rn all depend on this package. Any breaking change requires coordinated updates across all projects.
-- **Build both ESM and CJS outputs** -- consumers include both Node/Bun (ESM) and bundled apps that may need CJS. Always run `bun run build` and verify both outputs.
-- **Quality range is 1-10** with a default of 5. Do not use 0-100 or 0-1 scales.
-- **`exactOptionalPropertyTypes`** may be enabled in some consumers -- be careful with optional fields (use `field?: T | undefined` pattern if needed).
-- Run `bun run verify` before committing to catch issues across lint, typecheck, tests, and build.
-
-## Testing Notes
-
-- Tests are in `src/index.test.ts`
-- Test the helper functions (`successResponse`, `errorResponse`) and type guards
-- When adding new types, add corresponding tests for any associated helper functions
+- **`ConvertResult` returns `cacheId`, NOT the SVG string.** The server stores the SVG and the client fetches it separately via `GET /api/v1/svg/:cacheId`. Do not add an `svg` field.
+- **Response envelope is `BaseResponse<T>`** from `@sudobility/types`: `{ success, data?, error?, timestamp }`. Wrap results with `successResponse`/`errorResponse` rather than building objects by hand.
+- **`quality` is 1-10** (default 5); **`smooth` is 0-3** (default 0). Do not use 0-100 or 0-1 scales.
+- When adding an `ImageType` literal, also add it to the `IMAGE_TYPES` const array (they must stay in sync). Same pattern for `CommunityPlatform` / `COMMUNITY_PLATFORMS`.
+- **Any change here affects all consumers.** Breaking changes require coordinated updates across every `svgr_*` repo.
+- `exactOptionalPropertyTypes` may be on in some consumers — be careful with optional fields.
+- When adding types with helper functions, add corresponding tests (runtime and/or `expectTypeOf`) in `src/index.test.ts`.
+- Peer dependency: `@sudobility/types ^1.9.78`.
 
 ## Git Workflow
 
-- Do not use feature branches for code changes. Always stay on the current branch.
+- Do not use feature branches for code changes. Stay on the current branch.
