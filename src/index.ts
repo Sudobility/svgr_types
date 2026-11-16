@@ -8,6 +8,8 @@
 // ============================================
 // Re-exports from @sudobility/types
 // ============================================
+// Generic response/health types and the response constructors are the
+// canonical ones from @sudobility/types — this package never redefines them.
 export type {
   ApiResponse,
   BaseResponse,
@@ -15,9 +17,13 @@ export type {
   ConsumableUseResponse,
   ConsumablePurchaseRecord,
   ConsumableUsageRecord,
+  ApiInfoResponse,
+  HealthResponse,
+  HealthCheckData,
 } from '@sudobility/types';
+export { successResponse, errorResponse } from '@sudobility/types';
 
-// Local import for use in type aliases and helper functions below
+// Local import for use in type aliases below
 import type {
   BaseResponse,
   ConsumableBalanceResponse,
@@ -409,14 +415,9 @@ export interface AckResult {
 /** API response with a simple acknowledgement message */
 export type AckResponse = BaseResponse<AckResult>;
 
-/** API response for the GET /health endpoint */
-export interface HealthResult {
-  /** Server health status */
-  status: string;
-}
-
-/** API response for the health check endpoint */
-export type HealthResponse = BaseResponse<HealthResult>;
+// Health payloads (`HealthResponse` / `HealthCheckData`) are the generic ones
+// from @sudobility/types, re-exported at the top of this file. The /health
+// endpoint returns `successResponse(healthData)` i.e. `BaseResponse<HealthResponse>`.
 
 // ============================================
 // Community Types
@@ -463,87 +464,3 @@ export interface Community {
 
 /** API response for GET /api/v1/communities. */
 export type CommunitiesResponse = BaseResponse<Community[]>;
-
-// ============================================
-// Helper Functions
-// ============================================
-
-/**
- * Constructs a successful API response with the given data.
- *
- * Wraps arbitrary data in the standard {@link BaseResponse} success envelope with a current timestamp.
- * The generic type parameter T allows the data to be any shape.
- *
- * @template T - The type of data being returned
- * @param {T} data - The conversion result or other data to include in the success response
- * @returns {BaseResponse<T>} A success response object with success=true, data, and timestamp
- *
- * @example
- * // For ConvertResult
- * const response = successResponse({
- *   cacheId: 'abc123-def456',
- *   width: 100,
- *   height: 100
- * });
- * // Returns:
- * // {
- * //   success: true,
- * //   data: { cacheId: 'abc123-def456', width: 100, height: 100 },
- * //   timestamp: '2026-02-23T12:34:56.789Z'
- * // }
- *
- * @example
- * // Generic usage with any data type
- * const msgResponse = successResponse({ message: 'Processing started' });
- * // Returns:
- * // {
- * //   success: true,
- * //   data: { message: 'Processing started' },
- * //   timestamp: '2026-02-23T12:34:56.789Z'
- * // }
- */
-export function successResponse<T>(data: T): BaseResponse<T> {
-  return {
-    success: true,
-    data,
-    timestamp: new Date().toISOString(),
-  };
-}
-
-/**
- * Constructs an error API response with the given error message.
- *
- * Creates a standard {@link BaseResponse} error envelope with success=false, no data field,
- * and a current timestamp. The return type uses `never` for the generic parameter to indicate
- * that successful data cannot exist in error responses.
- *
- * @param {string} error - A descriptive error message
- * @returns {BaseResponse<never>} An error response object with success=false, error message, and timestamp
- *
- * @example
- * // For conversion errors
- * const response = errorResponse('Invalid image format: expected PNG, JPG, WEBP, BMP, or GIF');
- * // Returns:
- * // {
- * //   success: false,
- * //   error: 'Invalid image format: expected PNG, JPG, WEBP, BMP, or GIF',
- * //   timestamp: '2026-02-23T12:34:56.789Z'
- * // }
- *
- * @example
- * // For other errors
- * const response = errorResponse('Quality must be between 1 and 10');
- * // Returns:
- * // {
- * //   success: false,
- * //   error: 'Quality must be between 1 and 10',
- * //   timestamp: '2026-02-23T12:34:56.789Z'
- * // }
- */
-export function errorResponse(error: string): BaseResponse<never> {
-  return {
-    success: false,
-    error,
-    timestamp: new Date().toISOString(),
-  };
-}
